@@ -1,0 +1,46 @@
+.container {
+  box-sizing: border-box;
+  max-width: 1200px;
+  margin: auto;
+}
+.title {
+  text-align: center;
+}
+#avatarUser {
+  width: 100px;
+  display: block;
+  border-radius: 50%;
+}
+/* Điều chỉnh kích thước của hình ảnh */
+.thumbnail {
+  max-width: 200px; /* Đặt kích thước tối đa cho chiều rộng */
+  max-height: 200px; /* Đặt kích thước tối đa cho chiều cao */
+  display: block;
+  border-radius: 10px;
+  /* Hoặc có thể chỉ định cả chiều rộng và chiều cao tối đa cùng lúc:
+  max-width: 200px;
+  max-height: 200px; */
+  /* Dùng thuộc tính 'object-fit' để hiển thị hình ảnh
+
+  object-fit: cover; /* hoặc 'contain' nếu bạn muốn hình hiển thị đầy đủ trong khung */
+}
+/* Tạo grid layout cho các hình ảnh và button */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-gap: 20px;
+  justify-items: center;
+  align-items: center;
+}
+.imgDetail {
+  max-width: 500px; /* Đặt kích thước tối đa cho chiều rộng */
+  max-height: 500px; /* Đặt kích thước tối đa cho chiều cao */
+  display: block;
+  border-radius: 10px;
+}
+.avatarUserCmt {
+  border: 1px solid;
+  width: 50px;
+  display: block;
+  border-radius: 50%;
+}

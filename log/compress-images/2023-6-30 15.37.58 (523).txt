@@ -1,0 +1,8 @@
+File from: [C:\Users\voqua\Downloads\Lap_trinh_BackEnd\capstones\capstone_nestjs/public/img/1690706278410_img1-user1.jpg]
+
+File to: [./public/img_compress/1690706278410_img1-user1.jpg]
+
+Compression algorithm: [mozjpeg]
+
+Description: Error: Command failed: C:\Users\voqua\Downloads\Lap_trinh_BackEnd\capstones\capstone_nestjs\node_modules\mozjpeg\vendor\cjpeg.exe -quality 25 -outfile ./public/img_compress/1690706278410_img1-user1.jpg C:\Users\voqua\Downloads\Lap_trinh_BackEnd\capstones\capstone_nestjs/public/img/1690706278410_img1-user1.jpg
+Unrecognized input file format --- perhaps you need -targa

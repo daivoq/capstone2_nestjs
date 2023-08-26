@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <button onclick="goToHome()">Home</button>
+
+      <div class="title">
+        <h1>Trang chi tiết</h1>
+        <p>Xin chào! Đây là trang chi tiết.</p>
+      </div>
+
+      <div>
+        <div id="infoImg"></div>
+        <div>
+          <p id="isSaved"></p>
+          <p id="boxSave"></p>
+        </div>
+      </div>
+
+      <div>
+        <h3>Tất cả bình luận</h3>
+        <div id="listComment"></div>
+      </div>
+
+      <div>
+        <h3>Thêm bình luận:</h3>
+        <input
+          type="text"
+          id="noi_dung"
+          name="noi_dung"
+          placeholder="Nhập nội dung ..."
+        />
+        <button onclick="comment()">Thêm</button>
+      </div>
+    </div>
+
+    <script>
+      function goToHome() {
+        window.location.href = 'home.html';
+      }
+
+      // Lấy giá trị của 'id' từ URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const imageId = urlParams.get('id');
+      console.log('imageId: ', imageId);
+
+      const token = localStorage.getItem('token');
+      const URLImg = 'http://localhost:8080/public/img_compress/';
+
+      // get info
+      // Gọi hàm để lấy thông tin chi tiết với imageId
+      getImageDetail(imageId);
+      function getImageDetail(imageId) {
+        axios
+          .get(`http://localhost:8080/hinhanh/${imageId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            const imageDetail = response.data;
+            // Hiển thị thông tin hình ảnh lên UI
+            displayImageDetail(imageDetail);
+
+            // Gọi hàm isSave() sau khi hiển thị thông tin hình ảnh
+            isSave();
+          })
+          .catch((error) => {
+            console.error('Lỗi khi lấy thông tin hình ảnh:', error);
+          });
+      }
+
+      // Function để hiển thị thông tin hình ảnh lên UI
+      function displayImageDetail(imageDetail) {
+        const imageDetailDiv = document.getElementById('infoImg');
+        // Hiển thị thông tin hình ảnh dựa trên dữ liệu từ server
+        imageDetailDiv.innerHTML = `
+        <div>
+          <img class='imgDetail' src="${URLImg}${imageDetail.ten_hinh}">
+
+          <span style='margin-right: 20px'>
+          <strong>ID hình:</strong>  
+          ${imageDetail.hinh_id}
+          </span>  
+
+          <span>
+          <strong>Người tạo:</strong>  
+          ${imageDetail.nguoi_dung.ho_ten}
+          </span>  
+        </div>
+      `;
+        const boxSave = document.getElementById('boxSave');
+        boxSave.innerHTML = `
+      <button onclick= 'luuImg(${imageDetail.hinh_id})'>Lưu ảnh</button>
+      `;
+      }
+
+      // kiểm tra lưu
+      function isSave() {
+        axios
+          .get(`http://localhost:8080/luuanh/user-is-saved-img/${imageId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            const isSaveImg = response.data;
+            const isSavedElement = document.getElementById('isSaved');
+
+            if (isSaveImg == 'nosave') {
+              isSavedElement.innerHTML = `
+          <button style="color: blue">Bạn chưa lưu</button>
+        `;
+              document.getElementById('boxSave').style.display = 'block';
+            } else if (isSaveImg == 'saved') {
+              isSavedElement.innerHTML = `
+          <button style="color: red">Bạn đã lưu</button>
+        `;
+              document.getElementById('boxSave').style.display = 'none';
+            }
+          })
+          .catch((error) => {
+            console.error('Lỗi khi lấy thông tin hình ảnh:', error);
+          });
+      }
+      isSave();
+
+      // lưu hình
+      function luuImg(imgId) {
+        // Gửi yêu cầu POST đến máy chủ để lưu ảnh
+        axios
+          .post(
+            `http://localhost:8080/luuanh/${imgId}`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          .then(function (response) {
+            console.log('Ảnh đã được lưu thành công!');
+            isSave();
+          })
+          .catch(function (error) {
+            console.error('Lỗi khi lưu ảnh:', error);
+          });
+      }
+
+      // get list listComment
+      function getListComment() {
+        axios
+          .get(`http://localhost:8080/binhluan/comment-by-id-img/${imageId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            const listComment = response.data;
+            console.log('listComment: ', listComment);
+            // Hiển thị thông tin hình ảnh lên UI
+            displayListComment(listComment);
+          })
+          .catch((error) => {
+            console.error('Lỗi khi lấy thông tin hình ảnh:', error);
+          });
+      }
+      getListComment();
+
+      // hiển thị list comment
+      function displayListComment(listComment) {
+        const commentContainer = document.getElementById('listComment');
+
+        commentContainer.innerHTML = '';
+
+        listComment.forEach((comment) => {
+          const commentElement = document.createElement('div');
+
+          const avatarUser = document.createElement('img');
+          avatarUser.src = URLImg + comment.nguoi_dung.anh_dai_dien;
+          avatarUser.className = 'avatarUserCmt';
+
+          const commentUser = document.createElement('strong');
+          commentUser.textContent = `${comment.nguoi_dung.ho_ten}`;
+
+          const commentText = document.createElement('p');
+          commentText.textContent = `${comment.noi_dung}`;
+
+          commentElement.appendChild(avatarUser);
+          commentElement.appendChild(commentUser);
+          commentElement.appendChild(commentText);
+
+          commentContainer.appendChild(commentElement);
+        });
+      }
+
+      // Bình luận
+      function comment() {
+        const noi_dung = document.getElementById('noi_dung').value;
+
+        axios
+          .post(
+            `http://localhost:8080/binhluan/add-comment/${imageId}`,
+            {
+              noi_dung: noi_dung,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          .then((response) => {
+            console.log('thêm bình luận thành công');
+            document.getElementById('noi_dung').value = '';
+            getListComment();
+          })
+          .catch((error) => {
+            console.error('Lỗi khi thêm bình luận:', error);
+          });
+      }
+    </script>
+  </body>
+</html>

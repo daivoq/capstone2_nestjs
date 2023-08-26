@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang Signup</title>
+    <link rel="stylesheet" href="main.css" />
+    <!-- Thêm thẻ script để gọi Axios từ CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body>
+    <button onclick="goToLogin()">Đăng nhập</button>
+    <button onclick="goToHome()">Trang chủ</button>
+    <div class="container">
+      <h1>Trang đăng ký (Sign Up)</h1>
+      <p>Xin chào! Đây là trang đăng ký.</p>
+
+      <!-- Thêm các ô input cho họ tên, email, mật khẩu và tuổi -->
+      <div style="font-size: larger">
+        <label for="hoTen">Họ tên:</label>
+        <input type="text" id="hoTen" name="hoTen" placeholder="Nhập họ tên" />
+      </div>
+      <br />
+      <div style="font-size: larger">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="Nhập email" />
+      </div>
+      <br />
+      <div style="font-size: larger">
+        <label for="matKhau">Mật khẩu:</label>
+        <input
+          type="password"
+          id="matKhau"
+          name="matKhau"
+          placeholder="Nhập mật khẩu"
+        />
+      </div>
+      <br />
+      <div style="font-size: larger">
+        <label for="tuoi">Tuổi:</label>
+        <input type="number" id="tuoi" name="tuoi" placeholder="Nhập tuổi" />
+      </div>
+      <br />
+      <button onclick="signup()">Đăng ký</button>
+    </div>
+
+    <script>
+      function goToLogin() {
+        window.location.href = 'login.html';
+      }
+      function goToSignUp() {
+        window.location.href = 'signup.html';
+      }
+      function goToHome() {
+        window.location.href = 'home.html';
+      }
+
+      function signup() {
+        // Lấy thông tin từ các ô input
+        const hoTen = document.getElementById('hoTen').value;
+        const email = document.getElementById('email').value;
+        const matKhau = document.getElementById('matKhau').value;
+        const tuoi = document.getElementById('tuoi').value;
+
+        // Gửi yêu cầu POST bằng Axios
+        axios
+          .post('http://localhost:8080/auth/sign-up', {
+            ho_ten: hoTen,
+            email: email,
+            mat_khau: matKhau,
+            tuoi: tuoi,
+          })
+          .then(function (response) {
+            console.log(response.data);
+            // Xử lý logic sau khi đăng ký thành công (ví dụ: chuyển hướng đến trang đăng nhập)
+            goToLogin();
+          })
+          .catch(function (error) {
+            console.error('Đăng ký thất bại:', error);
+            alert('Đăng ký thất bại:\n' + JSON.stringify(error, null, 2));
+          });
+      }
+    </script>
+  </body>
+</html>

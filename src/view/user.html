@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang cá nhân</title>
+    <link rel="stylesheet" href="main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <button onclick="goToHome()">Trang chủ</button>
+
+      <div class="container">
+        <div class="title">
+          <h1>Trang Cá Nhân (Info)</h1>
+          <p>Xin chào! Đây là trang cá nhân.</p>
+          <div id="thongBao" style="display: block">
+            <p>Bạn chưa đăng nhập</p>
+            <button onclick="goToLogin()">Đăng nhập</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- cập nhật avatar -->
+      <div>
+        <h3>Cập nhật avatar</h3>
+        <input
+          type="file"
+          id="avatarInput"
+          style="border: 1px solid; border-radius: 5px"
+        />
+        <button onclick="updateAvatar()">Cập nhật</button>
+      </div>
+
+      <div>
+        <div style="display: flex">
+          <div id="userInfo" style="padding: 20px"></div>
+          <div style="margin-left: 100px">
+            <h3>Cập nhật thông tin người dùng</h3>
+
+            <div>
+              <label for="hoTen"><strong>Họ tên:</strong></label>
+              <input type="text" id="hoTen" name="hoTen" required />
+            </div>
+            <br />
+
+            <div>
+              <label for="email"><strong>Email:</strong></label>
+              <input type="email" id="email" name="email" required />
+            </div>
+            <br />
+
+            <div>
+              <label for="matKhau"><strong>Mật khẩu:</strong></label>
+              <input type="password" id="matKhau" name="matKhau" required />
+            </div>
+            <br />
+
+            <div>
+              <label for="tuoi"><strong>Tuổi:</strong></label>
+              <input type="number" id="tuoi" name="tuoi" required />
+            </div>
+            <br />
+
+            <button onclick="updateUser()">Cập nhật</button>
+          </div>
+        </div>
+
+        <div id="img">
+          <div id="imgCreated">
+            <h3>Các hình đã đăng</h3>
+            <div id="listImgCreated" class="image-grid"></div>
+          </div>
+
+          <div id="imgSaved">
+            <h3>Các hình đã lưu</h3>
+            <div id="listImgSaved"></div>
+          </div>
+
+          <div>
+            <h3>Đăng ảnh</h3>
+            <input
+              type="file"
+              id="imageInput"
+              style="border: 1px solid; border-radius: 5px"
+            />
+            <button onclick="uploadImage()">Tải lên</button>
+            <div id="preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function goToHome() {
+        window.location.href = 'home.html';
+      }
+      function goToLogin() {
+        window.location.href = 'login.html';
+      }
+
+      const token = localStorage.getItem('token');
+      const userInfoDiv = document.getElementById('userInfo');
+      const URLImg = 'http://localhost:8080/public/img_compress/';
+
+      // lấy thông tin user
+      function getUser() {
+        axios
+          .get('http://localhost:8080/nguoidung/get-user', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(function (response) {
+            // Lấy thông tin từ dữ liệu trả về
+            const userInfo = response.data;
+
+            // Hiển thị thông tin trên UI
+            displayUserInfo(userInfo);
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+      }
+      getUser();
+
+      // Ẩn thông tin user nếu chưa đăng nhập
+      function displayUserInfo(userInfo) {
+        // Kiểm tra xem dữ liệu userInfo có tồn tại hay không
+        if (userInfo.email == undefined) {
+          // Hoặc có thể ẩn phần tử nếu muốn
+          userInfoDiv.style.display = 'none';
+          document.getElementById('thongBao').style.display = 'block';
+        } else {
+          // Tạo HTML để hiển thị thông tin và hình ảnh avatar
+          const html = `
+            <img id="avatarUser" src="${URLImg}${userInfo.anh_dai_dien}" alt="Avatar">
+            <p><strong>Họ tên:</strong> ${userInfo.ho_ten}</p>
+            <p><strong>Email:</strong> ${userInfo.email}</p>
+            <p><strong>Tuổi:</strong> ${userInfo.tuoi}</p>
+          `;
+          // Gán HTML vào phần tử để hiển thị
+          userInfoDiv.innerHTML = html;
+          if (userInfo.email != undefined) {
+            document.getElementById('thongBao').style.display = 'none';
+          }
+        }
+      }
+
+      // cập nhật avatar
+      function updateAvatar() {
+        const input = document.getElementById('avatarInput');
+        const file = input.files[0];
+
+        if (!file) {
+          alert('Vui lòng chọn một hình ảnh để cập nhật.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        axios
+          .post('http://localhost:8080/files/upload-avatar', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            alert('Cập nhật ảnh đại diện thành công!');
+            // Refresh lại danh sách người dùng sau khi cập nhật thành công
+            location.reload();
+          })
+          .catch((error) => {
+            console.error('Lỗi khi cập nhật ảnh đại diện:', error);
+          });
+      }
+
+      // lấy danh sách ảnh đã đăng
+      function getImgCreated() {
+        axios
+          .post(
+            'http://localhost:8080/hinhanh/imgs-created',
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          .then(function (response) {
+            // Lấy thông tin từ dữ liệu trả về
+            const imgCreated = response.data;
+            console.log('imgCreated: ', imgCreated);
+
+            // Hiển thị thông tin trên UI
+            displayImgCreated(imgCreated);
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+      }
+      getImgCreated();
+
+      // đăng ảnh
+      function uploadImage() {
+        const input = document.getElementById('imageInput');
+        const file = input.files[0];
+
+        if (!file) {
+          alert('Vui lòng chọn một hình ảnh để tải lên.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        axios
+          .post('http://localhost:8080/files/upload-image', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`, // Gửi token qua header cho việc xác thực
+            },
+          })
+          .then(function (response) {
+            const imgList = response.data;
+            displayImages(imgList);
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+      }
+
+      // Hàm kiểm tra trạng thái lưu ảnh từ server
+      async function userIsSaved(hinhId) {
+        try {
+          const response = await fetch(
+            `http://localhost:8080/luuanh/user-is-saved-img/${hinhId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // Thêm token vào header với tên là 'Authorization'
+              },
+            },
+          );
+          const result = await response.text();
+          return result; // Kết quả trả về sẽ là "saved" hoặc "nosave"
+        } catch (error) {
+          console.error('Lỗi khi kiểm tra trạng thái lưu ảnh:', error);
+          return 'error';
+        }
+      }
+
+      // Hàm hiển thị ảnh đã đăng trên giao diện người dùng (UI)
+      function displayImgCreated(imgCreated) {
+        // Lấy thẻ div 'listImgCreated' để chứa danh sách ảnh đã đăng
+        const imageListDiv = document.getElementById('listImgCreated');
+
+        // Xóa hết nội dung bên trong 'listImgCreated' để chuẩn bị hiển thị danh sách mới
+        imageListDiv.innerHTML = '';
+
+        // Kiểm tra xem 'imgCreated' có tồn tại và là một mảng hay không
+        if (Array.isArray(imgCreated) && imgCreated.length > 0) {
+          // Nếu 'imgCreated' là một mảng và có ít nhất một phần tử, thực hiện vòng lặp forEach để xử lý từng ảnh
+          imgCreated.forEach((image) => {
+            // Tạo một cặp div chứa hình ảnh và button
+            const imageWrapperDiv = document.createElement('div');
+            imageWrapperDiv.classList.add('image-wrapper'); // Thêm class 'image-wrapper' để trang trí CSS (nếu cần)
+
+            // Tạo thẻ <img> và chèn vào 'imageWrapperDiv'
+            const imgElement = document.createElement('img');
+            imgElement.src = URLImg + image.ten_hinh; // URLImg là một biến chứa đường dẫn tới thư mục chứa hình ảnh
+            imgElement.alt = 'Image'; // Text hiển thị nếu không tải được ảnh
+            imgElement.classList.add('thumbnail'); // Thêm class 'thumbnail' để trang trí CSS (nếu cần)
+            imageWrapperDiv.appendChild(imgElement);
+
+            // Tạo thẻ button 'Xóa' (Delete)
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Xóa'; // Chữ hiển thị trên button
+            deleteButton.addEventListener('click', () => {
+              // Khi button 'Xóa' được click, gọi hàm 'deleteImgCreated' để xóa ảnh
+              deleteImgCreated(image.hinh_id); // 'image.hinh_id' là mã duy nhất của hình ảnh tương ứng
+            });
+            imageWrapperDiv.appendChild(deleteButton);
+
+            // Thêm một khoảng cách giữa nút 'Xóa' và nút 'Lưu' (tuỳ chỉnh theo ý thích)
+            deleteButton.style.marginRight = '10px';
+
+            // Tạo thẻ button 'Lưu' (Save)
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Lưu';
+            saveButton.dataset.imageId = image.hinh_id; // Thêm thuộc tính 'data-image-id' để lưu mã duy nhất của ảnh
+            saveButton.addEventListener('click', () => {
+              // Khi button 'Lưu' được click, gọi hàm 'luuImg' để lưu ảnh
+              luuImg(image.hinh_id); // 'image.hinh_id' là mã duy nhất của hình ảnh tương ứng
+            });
+            imageWrapperDiv.appendChild(saveButton);
+
+            // Kiểm tra trạng thái lưu ảnh từ server và ẩn hoặc hiển thị nút 'Lưu' tương ứng
+            userIsSaved(image.hinh_id)
+              .then((status) => {
+                if (status === 'nosave') {
+                  // Nếu kết quả trả về là 'nosave', hiển thị nút 'Lưu'
+                  saveButton.style.display = 'inline-block';
+                } else {
+                  // Ngược lại, ẩn nút 'Lưu'
+                  saveButton.style.display = 'none';
+                }
+              })
+              .catch((error) => {
+                console.error('Lỗi khi kiểm tra trạng thái lưu ảnh:', error);
+                // Trong trường hợp xảy ra lỗi khi kiểm tra trạng thái lưu ảnh,
+                // có thể hiển thị nút 'Lưu' hoặc ẩn nút 'Lưu', tùy theo yêu cầu.
+              });
+
+            // Thêm cặp div vào 'imageListDiv'
+            imageListDiv.appendChild(imageWrapperDiv);
+          });
+        } else {
+          // Nếu 'imgCreated' không phải là mảng hoặc là mảng rỗng, hiển thị thông báo cho người dùng
+          const messageDiv = document.createElement('div');
+          messageDiv.textContent = 'Không có ảnh để hiển thị.';
+          imageListDiv.appendChild(messageDiv);
+        }
+      }
+
+      // xóa hình
+      function deleteImgCreated(imageId) {
+        // Lấy ID hoặc thông tin duy nhất của ảnh từ đối tượng DOM imageTd (có thể là data-attribute hoặc thông tin được lưu trong element khác)
+        // const imageId = imageTd.getAttribute('data-image-id');
+
+        // Gửi yêu cầu DELETE đến server để xóa ảnh
+        axios
+          .delete(`http://localhost:8080/hinhanh/${imageId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(function (response) {
+            // Xóa thành công, cập nhật giao diện người dùng bằng cách loại bỏ ảnh khỏi DOM
+            alert('đã xóa ảnh');
+            // Sử dụng setTimeout để đặt hàm thực thi sau một khoảng thời gian nhất định
+            setTimeout(function () {
+              // Reset trang bằng cách chuyển hướng đến trang hiện tại (làm mới trang)
+              window.location.reload();
+            }, 500);
+          })
+          .catch(function (error) {
+            console.error(error);
+            // Xử lý lỗi nếu xóa không thành công
+          });
+      }
+
+      // lưu hình
+      function luuImg(imgId) {
+        // Gửi yêu cầu POST đến máy chủ để lưu ảnh
+        axios
+          .post(
+            `http://localhost:8080/luuanh/${imgId}`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          .then(function (response) {
+            console.log('Ảnh đã được lưu thành công!');
+            location.reload();
+          })
+          .catch(function (error) {
+            console.error('Lỗi khi lưu ảnh:', error);
+          });
+      }
+
+      // lấy danh sách ảnh đã lưu
+      function getImgSaved() {
+        axios
+          .get('http://localhost:8080/luuanh/list-img-user-saved', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(function (response) {
+            const imgSaved = response.data;
+            console.log('imgSaved: ', imgSaved);
+
+            // Hiển thị danh sách ảnh đã lưu lên giao diện UI
+            displayImgSaved(imgSaved);
+          })
+          .catch(function (error) {
+            console.error('Lỗi khi lấy danh sách ảnh đã lưu:', error);
+          });
+      }
+      getImgSaved();
+
+      // Hàm hiển thị ảnh đã lưu trên UI
+      function displayImgSaved(imgSaved) {
+        const imageSavedListDiv = document.getElementById('listImgSaved');
+        imageSavedListDiv.innerHTML = '';
+
+        if (Array.isArray(imgSaved) && imgSaved.length > 0) {
+          // Nếu có dữ liệu ảnh đã lưu và có ít nhất một ảnh, thực hiện việc hiển thị
+          const imageListDiv = document.createElement('div');
+          imageListDiv.className = 'image-grid';
+
+          // Tạo phần tử và chèn hình ảnh và button vào imageListDiv cho mỗi ảnh đã lưu
+          imgSaved.forEach((image) => {
+            // Tạo một cặp div chứa hình ảnh và button
+            const imageWrapperDiv = document.createElement('div');
+
+            // Tạo thẻ img và chèn vào imageWrapperDiv
+            const imgElement = document.createElement('img');
+            imgElement.src = URLImg + image.hinh_anh.ten_hinh;
+            imgElement.alt = 'Image';
+            imgElement.classList.add('thumbnail');
+            imageWrapperDiv.appendChild(imgElement);
+
+            // Thêm cặp div vào imageListDiv
+            imageListDiv.appendChild(imageWrapperDiv);
+          });
+
+          // Thêm danh sách ảnh đã lưu vào vùng chứa trên trang
+          imageSavedListDiv.appendChild(imageListDiv);
+        } else {
+          // Nếu không có dữ liệu ảnh đã lưu hoặc dữ liệu không hợp lệ, hiển thị thông báo cho người dùng
+          const messageDiv = document.createElement('div');
+          messageDiv.textContent = 'Không có ảnh đã lưu.';
+          imageSavedListDiv.appendChild(messageDiv);
+        }
+      }
+
+      // cập nhật thông tin user
+      async function updateUser() {
+        const hoTen = document.getElementById('hoTen').value;
+        const email = document.getElementById('email').value;
+        const matKhau = document.getElementById('matKhau').value;
+        const tuoi = document.getElementById('tuoi').value;
+
+        const token = localStorage.getItem('token'); // Lấy token từ localStorage
+
+        try {
+          const response = await axios.post(
+            'http://localhost:8080/nguoidung/update', // Endpoint API cập nhật thông tin người dùng
+            {
+              ho_ten: hoTen,
+              email: email,
+              mat_khau: matKhau,
+              tuoi: tuoi,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+
+          console.log(response.data);
+          location.reload();
+        } catch (error) {
+          console.error('Lỗi khi cập nhật thông tin người dùng:', error);
+        }
+      }
+    </script>
+  </body>
+</html>

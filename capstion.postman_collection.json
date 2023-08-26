@@ -1,0 +1,262 @@
+{
+	"info": {
+		"_postman_id": "01bfbe2c-cbc6-4a91-9edd-f018e972d08d",
+		"name": "capstion",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "28078036"
+	},
+	"item": [
+		{
+			"name": "đăng ký",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ho_ten\":\"\",\r\n    \"email\":\"\",\r\n    \"mat_khau\":\"\",\r\n    \"tuoi\":22\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/auth/sign-up"
+			},
+			"response": []
+		},
+		{
+			"name": "đăng nhập",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"\",\r\n    \"mat_khau\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/auth/login"
+			},
+			"response": []
+		},
+		{
+			"name": "lấy danh sách tất cả user",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/auth/get-all-user"
+			},
+			"response": []
+		},
+		{
+			"name": "tiềm kiếm hình bằng tên",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"search\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/hinhanh/search"
+			},
+			"response": []
+		},
+		{
+			"name": "thông tin hình ảnh và user tạo",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/hinhanh/1"
+			},
+			"response": []
+		},
+		{
+			"name": "thông tin bình luận",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/binhluan/comment-by-id-img/1"
+			},
+			"response": []
+		},
+		{
+			"name": "user đã lưu hình này hay chưa",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/luuanh/user-is-saved-img/1"
+			},
+			"response": []
+		},
+		{
+			"name": "thêm bình luận",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/binhluan/comment-by-id-img/1"
+			},
+			"response": []
+		},
+		{
+			"name": "get user id user từ token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/nguoidung/get-user"
+			},
+			"response": []
+		},
+		{
+			"name": "danh sách ảnh đã lưu",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/luuanh/list-img-user-saved"
+			},
+			"response": []
+		},
+		{
+			"name": "danh sách ảnh đã tạo",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/hinhanh/imgs-created"
+			},
+			"response": []
+		},
+		{
+			"name": "xóa ảnh đã tạo",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/hinhanh/1"
+			},
+			"response": []
+		},
+		{
+			"name": "thêm ảnh",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"mo_ta\":\"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/files/upload-image"
+			},
+			"response": []
+		},
+		{
+			"name": "chỉnh sữa thông tin người dùng",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/nguoidung/update"
+			},
+			"response": []
+		},
+		{
+			"name": "cập nhật avatar",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "Bearer ",
+						"type": "text"
+					}
+				],
+				"url": "http://localhost:8080/files/upload-avatar"
+			},
+			"response": []
+		}
+	]
+}

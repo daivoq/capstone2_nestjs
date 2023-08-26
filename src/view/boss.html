@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang quản lý</title>
+    <link rel="stylesheet" href="main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <button onclick="goToHome()">Home</button>
+
+      <div class="title">
+        <h1>Trang Quản Lý</h1>
+        <p>Xin chào! Đây là trang quản lý.</p>
+      </div>
+
+      <div id="userList" class="image-grid" style="margin-top: 50px"></div>
+    </div>
+
+    <script>
+      function goToHome() {
+        window.location.href = 'home.html';
+      }
+
+      const token = localStorage.getItem('token');
+      const URLImg = 'http://localhost:8080/public/img_compress/';
+
+      // Địa chỉ API để lấy danh sách người dùng
+      function getAllUser() {
+        axios
+          .get('http://localhost:8080/auth/get-all-user', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            let users = response.data;
+            console.log('users: ', users);
+            displayUsers(users);
+          })
+          .catch((error) =>
+            console.error('Lỗi khi lấy danh sách người dùng:', error),
+          );
+      }
+      getAllUser();
+
+      function displayUsers(users) {
+        const userListDiv = document.getElementById('userList');
+        userListDiv.innerHTML = '';
+
+        if (Array.isArray(users) && users.length > 0) {
+          users.forEach((user) => {
+            const userDiv = document.createElement('div');
+            userDiv.innerHTML = `
+            <div>
+                <img id="avatarUser" src="${
+                  URLImg + user.anh_dai_dien
+                }" alt="Avatar">
+              <p><strong>ID:</strong> ${user.nguoi_dung_id}</p>
+              <p><strong>Tên:</strong> ${user.ho_ten}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+            </div>
+            `;
+            userListDiv.appendChild(userDiv);
+          });
+        } else {
+          const messageDiv = document.createElement('div');
+          messageDiv.textContent = 'Không có người dùng.';
+          userListDiv.appendChild(messageDiv);
+        }
+      }
+    </script>
+  </body>
+</html>

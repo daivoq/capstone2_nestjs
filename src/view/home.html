@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang Home</title>
+    <link rel="stylesheet" href="main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="title">
+        <h1>Trang chủ (Home)</h1>
+        <p>Xin chào! Đây là trang chủ.</p>
+        <button onclick="goToLogin()">Đăng nhập</button>
+        <button onclick="goToSignUp()">Đăng ký</button>
+        <button onclick="gotoQuanLy()">Quản lý</button>
+      </div>
+
+      <div>
+        <div id="userInfo" style="padding: 20px"></div>
+      </div>
+
+      <div>
+        <h2>Xem hôm nay có gì nào ??</h2>
+        <div style="margin-bottom: 50px">
+          <h3>Tìm kiếm hình ảnh</h3>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Thử nhập gì đó xem..."
+            style="border: 1px solid; border-radius: 5px"
+          />
+          <button onclick="searchImage()">Tìm kiếm</button>
+
+          <div id="listImgSearched"></div>
+        </div>
+        <div id="imageList" class="image-grid"></div>
+      </div>
+    </div>
+
+    <script>
+      function goToLogin() {
+        window.location.href = 'login.html';
+      }
+      function goToSignUp() {
+        window.location.href = 'signup.html';
+      }
+      function gotoInfo() {
+        window.location.href = 'user.html';
+      }
+      function goToDetailPage(imageId) {
+        // Chuyển hướng đến trang chi tiết với mã duy nhất của hình ảnh (imageId)
+        // Thay "detail.html" bằng URL của trang chi tiết của bạn
+        window.location.href = `detail.html?id=${imageId}`;
+      }
+      function gotoQuanLy() {
+        window.location.href = 'boss.html';
+      }
+
+      const token = localStorage.getItem('token');
+      const userInfoDiv = document.getElementById('userInfo');
+      const URLImg = 'http://localhost:8080/public/img_compress/';
+
+      // lấy thông tin user
+      function getUser() {
+        axios
+          .get('http://localhost:8080/nguoidung/get-user', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(function (response) {
+            // Lấy thông tin từ dữ liệu trả về
+            const userInfo = response.data;
+
+            // Hiển thị thông tin trên UI
+            displayUserInfo(userInfo);
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+      }
+      getUser();
+
+      // Ẩn thông tin user nếu chưa đăng nhập
+      function displayUserInfo(userInfo) {
+        // Kiểm tra xem dữ liệu userInfo có tồn tại hay không
+        if (userInfo.email == undefined) {
+          // Hoặc có thể ẩn phần tử nếu muốn
+          userInfoDiv.style.display = 'none';
+        } else {
+          // Tạo HTML để hiển thị thông tin và hình ảnh avatar
+          const html = `
+            <img id="avatarUser" src="${URLImg}${userInfo.anh_dai_dien}" alt="Avatar">
+            <p><strong>Xin chào:</strong> ${userInfo.ho_ten}</p>
+            <button onclick="gotoInfo()">Trang cá nhân</button>
+          `;
+          // Gán HTML vào phần tử để hiển thị
+          userInfoDiv.innerHTML = html;
+        }
+      }
+
+      // get all hình
+      function getAllImage() {
+        axios
+          .get('http://localhost:8080/hinhanh', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then(function (response) {
+            const data = response.data;
+
+            // Hiển thị thông tin trên UI
+            displayImageList(data);
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
+      }
+      getAllImage();
+
+      function displayImageList(data) {
+        const imageListDiv = document.getElementById('imageList');
+
+        // Xóa nội dung cũ của imageListDiv (nếu có) để chuẩn bị hiển thị danh sách mới
+        imageListDiv.innerHTML = '';
+
+        // Tạo phần tử và chèn hình ảnh và button vào imageListDiv cho mỗi hình ảnh trong dữ liệu data
+        data.forEach((image) => {
+          // Tạo một cặp div chứa hình ảnh và button
+          const imageWrapperDiv = document.createElement('div');
+
+          // Tạo thẻ img và chèn vào imageWrapperDiv
+          const imgElement = document.createElement('img');
+          imgElement.src = URLImg + image.ten_hinh;
+          imgElement.alt = 'Image';
+          imgElement.classList.add('thumbnail');
+          imageWrapperDiv.appendChild(imgElement);
+
+          // Tạo thẻ button và chèn vào imageWrapperDiv
+          const detailButton = document.createElement('button');
+          detailButton.textContent = 'Chi tiết'; // Chữ hiển thị trên button
+          detailButton.addEventListener('click', () => {
+            // Chuyển đến trang chi tiết khi button được click
+            goToDetailPage(image.hinh_id); // Hãy thay "image.id" bằng mã duy nhất của hình ảnh tương ứng
+          });
+          imageWrapperDiv.appendChild(detailButton);
+
+          // Thêm cặp div vào imageListDiv
+          imageListDiv.appendChild(imageWrapperDiv);
+        });
+      }
+
+      // searchImage
+      function searchImage() {
+        const searchValue = document.getElementById('searchInput').value;
+        if (!searchValue) {
+          alert('Vui lòng nhập tên hình ảnh cần tìm kiếm.');
+          return;
+        }
+
+        // Gửi yêu cầu tìm kiếm hình ảnh theo tên về server
+        axios
+          .post(
+            'http://localhost:8080/hinhanh/search',
+            { search: searchValue },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          )
+          .then((response) => {
+            const imageList = response.data;
+            console.log('imageList: ', imageList);
+            // Hiển thị danh sách hình ảnh tìm kiếm được lên UI
+            displaySearchedImages(imageList);
+          })
+          .catch((error) => {
+            console.error('Lỗi khi tìm kiếm hình ảnh:', error);
+          });
+      }
+
+      // load ảnh search
+      function displaySearchedImages(imageList) {
+        const imageListDiv = document.getElementById('imageList');
+        imageListDiv.innerHTML = '';
+
+        // Tạo phần tử và chèn hình ảnh và button vào imageListDiv cho mỗi hình ảnh trong dữ liệu data
+        imageList.forEach((image) => {
+          // Tạo một cặp div chứa hình ảnh và button
+          const imageWrapperDiv = document.createElement('div');
+
+          // Tạo thẻ img và chèn vào imageWrapperDiv
+          const imgElement = document.createElement('img');
+          imgElement.src = URLImg + image.ten_hinh;
+          imgElement.alt = 'Image';
+          imgElement.classList.add('thumbnail');
+          imageWrapperDiv.appendChild(imgElement);
+
+          // Tạo thẻ button và chèn vào imageWrapperDiv
+          const detailButton = document.createElement('button');
+          detailButton.textContent = 'Chi tiết'; // Chữ hiển thị trên button
+          detailButton.addEventListener('click', () => {
+            // Chuyển đến trang chi tiết khi button được click
+            goToDetailPage(image.hinh_id); // Hãy thay "image.id" bằng mã duy nhất của hình ảnh tương ứng
+          });
+          imageWrapperDiv.appendChild(detailButton);
+
+          // Thêm cặp div vào imageListDiv
+          imageListDiv.appendChild(imageWrapperDiv);
+        });
+      }
+    </script>
+  </body>
+</html>
